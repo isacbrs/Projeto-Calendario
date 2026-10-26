@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:17
+    container_name: calengroup-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      # 127.0.0.1: o banco não fica exposto na rede. Host 5433 evita conflito com Postgres local.
+      - "127.0.0.1:5433:5432"
+    volumes: -pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U {POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  migrate:
+    image: flyway/flyway:11
+    container_name: calengroup-migrate
+    command: migrate
+    environment:
+      FLYWAY_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
+      FLYWAY_USER: ${POSTGRES_USER}
+      FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
+      FLYWAY_CONNECT_RETRIES: 10
+    volumes:
+      - ./db/migrations:/flyway/sql:ro
+    depends_on:
+      db:
+      condition: service_healthy
+
+  api:
+    build: ./backend
+    env.file: .env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "8000:8000"
+
+  volumes:
+  pgdata:

@@ -1,10 +1,10 @@
+# src/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.routes import index
+from src.routes import index, auth # <-- Adicione a importação do auth
 
 app = FastAPI(title="Calendário Acadêmico API")
 
-# Configuração de CORS (Permite que o Front-End acesse a API sem bloqueios)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -13,5 +13,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Adicionando as rotas ao servidor
-app.include_router(index.router, prefix="/api")
+# Suas rotas
+app.include_router(index.router, prefix="/api", tags=["Teste"])
+app.include_router(auth.router, prefix="/api/auth", tags=["Autenticação"]) # <-- Adicione esta linha

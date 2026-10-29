@@ -337,7 +337,7 @@ BEGIN
         (v_grupo, 'Evento antecedência 4', CURRENT_DATE + 5, 4);
 
     RAISE NOTICE
-        'OK: antecedentes 1 e 4 foram aceitos.';
+        'OK: antecedência 1 e 4 foram aceitos.';
 END $$;
 
 
